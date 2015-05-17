@@ -1,0 +1,95 @@
+---
+title: "Peer assignment1"
+author: "Liwei Zhao"
+date: "Sunday, May 17, 2015"
+output: html_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r, echo= TRUE}
+mydata <- read.csv("activity.csv")
+```
+
+
+The total number of steps taken per day
+```{r, echo=TRUE}
+q1 <- aggregate(steps~date, data=mydata,sum)
+print(q1)
+```
+```{r,echo=TRUE}
+hist(q1$steps,breaks=30, main="Total steps taken per day", xlab="Sum of steps", col="red")
+
+```
+
+
+The mean of steps taken per day
+```{r, echo=TRUE}
+mean(q1$steps)
+```
+
+The median of steps taken per day
+```{r, echo=TRUE}
+median(q1$steps)
+```
+
+```{r,echo=TRUE}
+q2<- aggregate(steps~interval, data=mydata, mean)
+plot(x=q2$interval,y=q2$steps,type="l",xlab="Interval",ylab="average steps")
+
+```
+
+The interval contains the maximum of average steps 
+```{r,echo=TRUE}
+q2$interval[which.max(q2$steps)]
+```
+
+
+Number of missing values in dataset
+```{r,echo=TRUE}
+sum(as.numeric(is.na(mydata$steps)))
+```
+
+replace missing values with average of each interval, and get a new dataset named mydata2
+```{r,echo=TRUE}
+mydata2 <- mydata
+for (i in 1:nrow(mydata)){
+  if (is.na(mydata$steps[i]==1))
+        aa <-subset(mydata,mydata$interval==mydata$interval[i])
+mydata2$steps[i] <- mean(aa$steps,na.rm=T) 
+}
+```
+
+plot using the new dataset
+```{r,echo=TRUE}
+q4<- aggregate(steps~interval, data=mydata2, mean)
+plot(x=q4$interval,y=q4$steps,type="l",xlab="Interval",ylab="average steps")
+
+```
+
+assign the day of week to each row, and subset them into two categories of "weekday" and "weekend"
+```{r,echo=TRUE}
+for(i in 1:nrow(mydata)){
+    if (weekdays(as.Date(as.character(mydata$date[i]),format="%Y-%m-%d"),abbreviate=TRUE)=="Sat"|weekdays(as.Date(as.character(mydata$date[i]),format="%Y-%m-%d"),abbreviate=TRUE)=="Sun")
+    {mydata$weekdays[i] <- "weekend"}
+  else (mydata$weekdays[i] <- "weekday")    
+}
+##calculate each category's average steps of intervals
+a1 <-subset(mydata, mydata$weekday=="weekday")
+weekday <- aggregate(steps~interval, data=a1, mean)
+
+a2 <-subset(mydata, mydata$weekday=="weekend")
+weekend <- aggregate(steps~interval, data=a2, mean)
+##plot average steps and interval relationship for weekdays and weekend
+par(mfrow=c(2,1))
+plot(x=weekday$interval,y=weekday$steps,type="l",col="blue", xlab="",ylab="Number of steps",main="Weekdays")
+
+plot(x=weekend$interval,y=weekend$steps,type="l",col="blue", xlab="Interval",ylab="Number of Steps",main="Weekend")
+```
+
+
+
+
+
